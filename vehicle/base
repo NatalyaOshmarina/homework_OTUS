@@ -1,0 +1,64 @@
+import exceptions
+from abc import ABC
+
+
+class Vehicle(ABC):
+    def __init__(self, weight=0, started=False, fuel=1.0, fuel_consumption=40):
+        self.weight = weight
+        self.started = started
+        self.fuel = fuel
+        self.fuel_consumption = fuel_consumption
+
+    def start(self):
+        if not self.started:
+            if self.fuel == 0:
+                exceptions.LowFuelError()
+            else:
+                self.started = True
+        return self.started
+
+    def move(self, distance):
+        if self.started:
+            if self.fuel_consumption / distance * 100 > self.fuel_consumption:
+                self.fuel -= self.fuel_consumption / 100 * distance
+                return self.fuel
+            else:
+                fuel_up = abs(self.fuel - self.fuel_consumption / 100 * distance)
+                exceptions.NotEnoughFuel(fuel_up)
+
+
+class Engine:
+    def __init__(self, volume, pistons):
+        self.volume = volume
+        self.pistons = pistons
+
+
+class Car(Vehicle):
+    def __init__(self, engine):
+        self.engine = self.set_engine()
+
+    def set_engine(self):
+        return self.engine
+
+
+class Plane(Vehicle):
+    def __init__(self, cargo=0, max_cargo=400):
+        super().__init__(weight=max_cargo)
+        self.cargo = cargo
+
+    def load_cargo(self, weight):
+        if weight + self.cargo < self.weight:
+            self.cargo += weight
+        else:
+            too_match = self.cargo + weight - self.weight
+            exceptions.CargoOverload(too_match)
+
+
+car = Vehicle(fuel=10)
+car.start()
+if car.started:
+    print('Go!')
+
+print(car.move(100))
+plane = Plane(cargo=250)
+plane.load_cargo(250)
